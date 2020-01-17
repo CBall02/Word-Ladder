@@ -9,13 +9,45 @@
 
 using namespace std;
 
-/* Constants */
-const int ALPHA_LENGTH = 26;
 
 /* Prototypes */
-void getWords(string &word1, string &word2);
-void printWordLadder(string word1, string word2, vector<string> &dictionary);
+void getWords(string &startingWord, string &endingWord);
+void printWordLadder(string startingWord, string endingWord, vector<string> &dictionary);
 bool checkRealWord(string word, vector<string> &dictionary);
+void getDict(vector<string> &wordsList);
+
+
+
+/* Main function */
+vector<string> dictionary;
+int main() {
+	
+	getDict(dictionary);
+	string word1, word2;
+	getWords(word1, word2);
+	printWordLadder(word1, word2, dictionary);
+	char answer;
+	while (true){
+		std::cout << endl << endl << "Would you like to generate another word ladder? y/n" << endl;
+		cin >> answer;
+		switch (answer) {
+		case 'y': case 'Y':
+			getWords(word1, word2);
+			printWordLadder(word1, word2, dictionary);
+
+			break;
+		case 'n': case 'N':
+			exit(0);
+		default:
+			cout << "Invalid Selection. Please try Again." << endl;
+			break;
+		}
+	}
+	
+	//system("pause");
+	return 0;
+}
+
 
 void getDict(vector<string> &wordsList) {
 	auto start = chrono::steady_clock::now();
@@ -59,46 +91,12 @@ void getDict(vector<string> &wordsList) {
 }
 
 
-/* Main function */
-vector<string> dictionary;
-int main() {
-	
-	getDict(dictionary);
-	string word1, word2;
-	getWords(word1, word2);
-	printWordLadder(word1, word2, dictionary);
-	char answer;
-	while (true){
-		std::cout << endl << endl << "Would you like to generate another word ladder? y/n" << endl;
-		cin >> answer;
-		switch (answer) {
-		case 'y': case 'Y':
-			getWords(word1, word2);
-			printWordLadder(word1, word2, dictionary);
-
-			break;
-		case 'n': case 'N':
-			exit(0);
-		default:
-			cout << "Invalid Selection. Please try Again." << endl;
-			break;
-		}
-	}
-	
-	//system("pause");
-	return 0;
-}
-
-
-
 //Function: checkRealWord
 //Usage: checkRealWord(word)
 //---------------------------
 //This function takes one string as a parameter (passed directly)
 //checks if the word passed is a member of the dictionary used.
 //returns bool
-
-
 bool checkRealWord(string word, vector<string> &dictionary) {
 	bool is_a_word = false;
 	unsigned long int i = 0;
@@ -114,25 +112,25 @@ bool checkRealWord(string word, vector<string> &dictionary) {
 
 
 //Function: getWords
-//Usage: getWords(word1, word2)
+//Usage: getWords(startword, endword)
 //-----------------------------
 //This function takes two strings as parameter (passed by reference),
 //prompts the user for her input and stores her answer in those two
 //parameters.
 
-void getWords(string &word1, string &word2) {
+void getWords(string &startingWord, string &endingWord) {
 	while (true) {
 		std::cout << "Please enter a word: ";
-		cin >> word1;
+		cin >> startingWord;
 
 		std::cout << "Please enter another word of the same length: ";
-		cin >> word2;
-		transform(word1.begin(), word1.end(), word1.begin(), ::tolower);
-		transform(word2.begin(), word2.end(), word2.begin(), ::tolower);
-		if (word1.length() == word2.length()) {
+		cin >> endingWord;
+		transform(startingWord.begin(), startingWord.end(), startingWord.begin(), ::tolower);
+		transform(endingWord.begin(), endingWord.end(), endingWord.begin(), ::tolower);
+		if (startingWord.length() == endingWord.length()) {
 			auto start = chrono::steady_clock::now();
-			bool first_real = checkRealWord(word1, dictionary);
-			bool second_real = checkRealWord(word2, dictionary);
+			bool first_real = checkRealWord(startingWord, dictionary);
+			bool second_real = checkRealWord(endingWord, dictionary);
 			auto end = chrono::steady_clock::now();
 			cout << "Dictionary check took " << chrono::duration_cast<chrono::milliseconds>(end - start).count() << " ms\n";
 			if (first_real == true && second_real == true) {
@@ -140,10 +138,10 @@ void getWords(string &word1, string &word2) {
 			}
 			else {
 				if(!first_real){
-					cout << word1 << " is not a real word. ";
+					cout << startingWord << " is not a real word. ";
 				}
 				if (!second_real) {
-					cout << word2 << " is not a real word. ";
+					cout << endingWord << " is not a real word. ";
 				}
 				std::cout << "Please enter two words that are real.\n";
 			}
@@ -162,19 +160,19 @@ void getWords(string &word1, string &word2) {
  * minimal word ladder between two words.
  */
 
-void printWordLadder(string word1, string word2, vector<string> &dictionary) {
+void printWordLadder(string startingWord, string endingWord, vector<string> &dictionary) {
 	auto start = chrono::steady_clock::now();
 
 	// creates an empty queue of stacks
-	queue<stack<string> > myQueue;
+	queue<stack<string> > Queue;
 
 	//Create a stack which will contain a final word ladder
 	stack<string> wordladder;
 
 	// creates and adds a stack containing word1 to the queue
 	stack<string> myStack;
-	myStack.push(word1);
-	myQueue.push(myStack);
+	myStack.push(startingWord);
+	Queue.push(myStack);
 
 	// creates two sets: one for the dictionary and one for the tested words
 	string token;
@@ -185,19 +183,17 @@ void printWordLadder(string word1, string word2, vector<string> &dictionary) {
 
 
 		// while the queue is not empty:
-		while (!(myQueue.empty())) {
+		while (!(Queue.empty())) {
 
-			// dequeue the partial-ladder stack from the front of the queue.
-			stack<string> ladder = myQueue.front();
-			myQueue.pop();
+			stack<string> ladder = Queue.front();
+			Queue.pop();
 			string word = ladder.top();
 
-			// if the word on top of the stack is the destination word:
-			if (word == word2) {
+			// if the word on top of the stack is the final word
+			if (word == endingWord) {
 				int number_In_Ladder = 0;
 				wordFound = true;
-				// Yeey! output the elements of the stack as the solution.
-				std::cout << "\nThe ladder from " << word1 << " to " << word2 << " takes ";
+				std::cout << "\nThe ladder from " << startingWord << " to " << endingWord << " takes ";
 
 				//Copy the ladder stack to worldladder to take it in the order.
 				while (!ladder.empty()) {
@@ -220,8 +216,8 @@ void printWordLadder(string word1, string word2, vector<string> &dictionary) {
 					}
 					else std::cout << " > ";
 				}
-				while (!myQueue.empty()){
-					myQueue.pop();
+				while (!Queue.empty()){
+					Queue.pop();
 				}
 				auto end = chrono::steady_clock::now();
 				cout << "\nWord ladder took " << chrono::duration_cast<chrono::milliseconds>(end - start).count() << " ms " << "to find. " << endl;
@@ -231,8 +227,8 @@ void printWordLadder(string word1, string word2, vector<string> &dictionary) {
 				// for each valid English word that is a "neighbor" (differs by 1 letter) of the word on top of the stack:
 				string test;
 				for (unsigned int i = 0; i < word.size(); i++) {
-					for (char j = 'a'; j <= 'z'; j++) {
-						test = word.substr(0, i) + j + word.substr(i + 1);
+					for (char currentLetter = 'a'; currentLetter <= 'z'; currentLetter++) {
+						test = word.substr(0, i) + currentLetter + word.substr(i + 1);
 
 						// if that word is an english word
 						if (myDictionary.count(test)) {
@@ -240,24 +236,20 @@ void printWordLadder(string word1, string word2, vector<string> &dictionary) {
 							// if that neighbor word has not already been used in a ladder before:
 							if (!testedWords.count(test)) {
 
-								// create a copy of the current ladder stack.
 								stack<string> copy = ladder;
 
-								// put the neighbor word on top of the copy stack.
 								copy.push(test);
 
-								// add the copy stack to the end of the queue.
-								myQueue.push(copy);
+								Queue.push(copy);
 							}
 						}
 
-						// Add test to tested words because it is already used.
 						testedWords.insert(test);
 					}
 				}
 			}
 		}
-		if (myQueue.empty()) {
+		if (Queue.empty()) {
 			if (wordFound == false) {
 				std::cout << "No word ladder found";
 				auto end = chrono::steady_clock::now();
