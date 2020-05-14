@@ -12,8 +12,8 @@ using namespace std;
 
 /* Prototypes */
 void getWords(string &startingWord, string &endingWord);
-void printWordLadder(string startingWord, string endingWord, vector<string> &dictionary);
-bool checkRealWord(string word, vector<string> &dictionary);
+void printWordLadder(const string startingWord, const string endingWord, vector<string> &dictionary);
+bool checkRealWord(const string &word, vector<string> &dictionary);
 void getDict(vector<string> &wordsList);
 
 
@@ -21,7 +21,6 @@ void getDict(vector<string> &wordsList);
 /* Main function */
 vector<string> dictionary;
 int main() {
-	
 	getDict(dictionary);
 	string word1, word2;
 	getWords(word1, word2);
@@ -97,7 +96,7 @@ void getDict(vector<string> &wordsList) {
 //This function takes one string as a parameter (passed directly)
 //checks if the word passed is a member of the dictionary used.
 //returns bool
-bool checkRealWord(string word, vector<string> &dictionary) {
+bool checkRealWord(const string &word, vector<string> &dictionary) {
 	bool is_a_word = false;
 	unsigned long int i = 0;
 	while ( i < dictionary.size()) {
@@ -160,7 +159,7 @@ void getWords(string &startingWord, string &endingWord) {
  * minimal word ladder between two words.
  */
 
-void printWordLadder(string startingWord, string endingWord, vector<string> &dictionary) {
+void printWordLadder(const string startingWord, const string endingWord, vector<string> &dictionary) {
 	auto start = chrono::steady_clock::now();
 
 	// creates an empty queue of stacks
