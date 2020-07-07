@@ -84,7 +84,6 @@ void getDict(vector<string> &wordsList) {
 				}
 				break;
 			}
-
 		}
 	}
 }
